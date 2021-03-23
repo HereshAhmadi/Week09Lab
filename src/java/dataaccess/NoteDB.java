@@ -2,118 +2,86 @@ package dataaccess;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
-import models.Note;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import models.Notes;
+import models.Users;
 
 public class NoteDB {
 
-    public List<Note> getAll(String owner) throws Exception {
-        List<Note> notes = new ArrayList<>();
-        ConnectionPool cp = ConnectionPool.getInstance();
-        Connection con = cp.getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+    public List<Notes> getAll(String owner) throws Exception {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
         
-        String sql = "SELECT * FROM notes WHERE owner=?";
-        
-        try {
-            ps = con.prepareStatement(sql);
-            ps.setString(1, owner);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                int noteId = rs.getInt(1);
-                String title = rs.getString(2);
-                String contents = rs.getString(3);
-                Note note = new Note(noteId, title, contents, owner);
-                notes.add(note);
-            }
-        } finally {
-            DBUtil.closeResultSet(rs);
-            DBUtil.closePreparedStatement(ps);
-            cp.freeConnection(con);
-        }
-
-        return notes;
-    }
-
-    public Note get(int noteId) throws Exception {
-        Note note = null;
-        ConnectionPool cp = ConnectionPool.getInstance();
-        Connection con = cp.getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String sql = "SELECT * FROM notes WHERE note_id=?";
-        
-        try {
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, noteId);
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                String title = rs.getString(2);
-                String contents = rs.getString(3);
-                String owner = rs.getString(4);
-                note = new Note(noteId, title, contents, owner);
-            }
-        } finally {
-            DBUtil.closeResultSet(rs);
-            DBUtil.closePreparedStatement(ps);
-            cp.freeConnection(con);
-        }
-        
-        return note;
-    }
-
-    public void insert(Note note) throws Exception {
-        ConnectionPool cp = ConnectionPool.getInstance();
-        Connection con = cp.getConnection();
-        PreparedStatement ps = null;
-        String sql = "INSERT INTO notes (title, contents, owner) VALUES (?, ?, ?)";
-        
-        try {
-            ps = con.prepareStatement(sql);
-            ps.setString(1, note.getTitle());
-            ps.setString(2, note.getContents());
-            ps.setString(3, note.getOwner());
-            ps.executeUpdate();
-        } finally {
-            DBUtil.closePreparedStatement(ps);
-            cp.freeConnection(con);
+        try{
+           // List<Notes> noteList = em.createNamedQuery("Notes.findAll",Notes.class);
+           Users user = em.find(Users.class, owner);
+           return user.getNotesList();
+        }finally{
+            em.close();
         }
     }
 
-    public void update(Note note) throws Exception {
-        ConnectionPool cp = ConnectionPool.getInstance();
-        Connection con = cp.getConnection();
-        PreparedStatement ps = null;
-        String sql = "UPDATE notes SET title=?, contents=? WHERE note_id=?";
-        
+    public Notes get(int noteId) throws Exception {
+       EntityManager em = DBUtil.getEmFactory().createEntityManager();
+       
+       try{
+           Notes note = em.find(Notes.class, noteId);
+          // String firstname = note.getOwner().getFirstname();
+        //  List<Notes> noteList = note.getOwner().getNotesList();
+           return note;
+       }finally{
+           em.close();
+       }
+  
+    }
+
+    public void insert(Notes note) throws Exception {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
         try {
-            ps = con.prepareStatement(sql);
-            ps.setString(1, note.getTitle());
-            ps.setString(2, note.getContents());
-            ps.setInt(3, note.getNoteId());
-            ps.executeUpdate();
-        } finally {
-            DBUtil.closePreparedStatement(ps);
-            cp.freeConnection(con);
+            Users user = note.getOwner();
+            user.getNotesList().add(note);
+            trans.begin();
+            em.persist(note);//equivalent to an insert statement
+            em.merge(user);//equivalent to an update statement 
+            trans.commit();//commit the changes 
+        } catch(Exception e){
+            trans.rollback();
+        }finally {
+            em.close();
         }
     }
 
-    public void delete(Note note) throws Exception {
-        ConnectionPool cp = ConnectionPool.getInstance();
-        Connection con = cp.getConnection();
-        PreparedStatement ps = null;
-        String sql = "DELETE FROM notes WHERE note_id=?";
-        
+    public void update(Notes note) throws Exception {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
         try {
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, note.getNoteId());
-            ps.executeUpdate();
-        } finally {
-            DBUtil.closePreparedStatement(ps);
-            cp.freeConnection(con);
+            trans.begin();
+            em.merge(note);//equivalent to an update statement 
+            trans.commit();//commit the changes 
+        } catch(Exception e){
+            trans.rollback();
+        }finally {
+            em.close();
+        }
+        
+    }
+
+    public void delete(Notes note) throws Exception {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            Users user = note.getOwner();
+            user.getNotesList().remove(note);
+            trans.begin();
+            em.remove(em.merge(note));//equivalent to a delete statement 
+            em.merge(user);//equivalent to an update statement 
+            trans.commit();//commit the changes 
+        } catch(Exception e){
+            trans.rollback();
+        }finally {
+            em.close();
         }
     }
 
