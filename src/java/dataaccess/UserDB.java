@@ -23,17 +23,14 @@ public class UserDB {
     
         public List<Users> getAll() throws Exception {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
-         List<Users> results = null;
-        
-        try{
+
           TypedQuery<Users> query = em.createNamedQuery("Users.findAll", Users.class);
-         results = query.getResultList();
-            
-        }finally{
+          List<Users> results = query.getResultList();
+
             
             em.close();
             return results;
-        }
+        
     }
 
 
