@@ -19,5 +19,31 @@ public class UserService {
         return userDB.get(email);
     }
     
+    public int delete(String email) throws Exception{
+        Users toDelete = userDB.get(email);
+        
+        if(toDelete.getEmail().equals("sait.cprg.352+admin@gmail.com")){
+            return 0;
+        }else{
+            return userDB.delete(toDelete);
+        }
+    }
+    
+    
+    public int update(Users user) throws Exception{
+        if(user == null){
+            return 0;
+        }
+        return userDB.update(user);
+    }
+    
+    public int insert(Users user) throws Exception{
+        if(user == null)
+            return 0;
+        
+        return userDB.insert(user);
+        
+    }
+    
     
 }
