@@ -21,6 +21,8 @@
             <p>  ${user.email}</p>
         </c:forEach>
 
-        ${message}
+        ${m.email}
+        ${m.firstname}
+        ${m.lastname}
     </body>
 </html>

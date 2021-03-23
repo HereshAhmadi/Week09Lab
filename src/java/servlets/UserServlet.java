@@ -3,6 +3,8 @@ package servlets;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -20,9 +22,10 @@ public class UserServlet extends HttpServlet {
             throws ServletException, IOException {
         
         UserService userService = new UserService();
+        
         ArrayList<Users> users = null;
         try{
-            users = (ArrayList<Users>) userService.getAllUsers();
+            users =  new ArrayList<Users>(userService.getAllUsers());
         }catch(Exception e){
            request.setAttribute("message", "error");
         }

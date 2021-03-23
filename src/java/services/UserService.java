@@ -40,7 +40,6 @@ public class UserService {
     public int insert(Users user) throws Exception{
         if(user == null)
             return 0;
-        
         return userDB.insert(user);
         
     }

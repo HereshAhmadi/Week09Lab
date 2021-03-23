@@ -1,7 +1,7 @@
-DROP DATABASE if exists notesdb;
-CREATE DATABASE notesdb;
+DROP DATABASE if exists usersdb;
+CREATE DATABASE usersdb;
 
-USE notesdb;
+USE usersdb;
 
 CREATE TABLE users (
     email VARCHAR(40) NOT NULL, 
@@ -22,19 +22,3 @@ VALUES
 ('sait.cprg.352+patty@gmail.com','password','Patrick','O''Furniture');
 COMMIT;
 
-CREATE TABLE notes (
-    note_id int(11) NOT NULL AUTO_INCREMENT,
-    title varchar(30) NOT NULL,
-    contents varchar(20000) CHARACTER SET utf8 NOT NULL,
-    owner varchar(40) NOT NULL,
-  PRIMARY KEY (note_id),
-  KEY FK_Notes_User (owner),
-  CONSTRAINT FK_Notes_User FOREIGN KEY (owner) REFERENCES users (email) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-INSERT INTO notes(title,contents,owner)
-VALUES
-('Quote #1', 'Writing is nature''s way of letting you know how sloppy your thinking is.', 'sait.cprg.352+anne@gmail.com'),
-('Another Quote', '"Java is to JavaScript as ham is to hamster." -  Jeremy Keith', 'sait.cprg.352+anne@gmail.com' ),
-('Matilda''s Note', 'I do not want Anne reading this note. She stole my broccoli casserole recipe 8 years ago and claimed it was hers.','sait.cprg.352+matilda@gmail.com');
-COMMIT;
